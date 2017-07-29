@@ -3,7 +3,7 @@ title = "Alex Metzger"
 baseurl = "https://asm.io/"
 theme = "aerial"
 enableRobotsTXT = true
-disableHugoGeneratorInject = false
+disableHugoGeneratorInject = true
 disableKinds=[ "RSS" ]
 googleAnalytics = "UA-71888221-1"
 ignoreFiles = [ "\\.gitkeep$" ]
@@ -11,7 +11,7 @@ ignoreFiles = [ "\\.gitkeep$" ]
 [params]
   name = "Alex Metzger"
   about = "Software Enthusiast &nbsp;&bull;&nbsp; Experienced Typist &nbsp;&bull;&nbsp; Computer Owner"
-  copyright = "Alex Metzger"
+  description = "Alex Metzger"
   bg_scroll = ""
   favicon = "favicon.ico"
 
