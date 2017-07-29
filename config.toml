@@ -6,6 +6,7 @@ enableRobotsTXT = true
 disableHugoGeneratorInject = false
 disableRSS = true
 googleAnalytics = "UA-71888221-1"
+ignoreFiles = [ "\\.gitkeep$" ]
 
 [params]
   name = "Alex Metzger"
