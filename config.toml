@@ -1,0 +1,26 @@
+languageCode = "en-us"
+title = "Alex Metzger"
+baseurl = "https://asm.io/"
+theme = "aerial"
+
+[params]
+  name = "Alex Metzger"
+  about = "Software Enthusiast &nbsp;&bull;&nbsp; Experienced Typist &nbsp;&bull;&nbsp; Computer Owner"
+  copyright = "Alex Metzger"
+  bg_scroll = ""
+  favicon = "favicon.ico"
+
+[[params.social]]
+  medium = "Twitter"
+  icon = "twitter"
+  link = "https://twitter.com/metzger"
+
+[[params.social]]
+  medium = "Github"
+  icon = "github"
+  link = "https://github.com/ametzger"
+
+[[params.social]]
+  medium = "Email"
+  icon = "envelope-o"
+  link = "asm@asm.io"
