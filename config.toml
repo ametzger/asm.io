@@ -11,6 +11,11 @@ theme = "aerial"
   favicon = "favicon.ico"
 
 [[params.social]]
+  medium = "Emoji"
+  icon = "smile-o"
+  link = "https://asm.io/emoji"
+
+[[params.social]]
   medium = "Twitter"
   icon = "twitter"
   link = "https://twitter.com/metzger"
@@ -21,6 +26,11 @@ theme = "aerial"
   link = "https://github.com/ametzger"
 
 [[params.social]]
+  medium = "LinkedIn"
+  icon = "linkedin-square"
+  link = "https://www.linkedin.com/in/asmetzger"
+
+[[params.social]]
   medium = "Email"
   icon = "envelope-o"
-  link = "asm@asm.io"
+  link = "mailto:asm@asm.io?subject=I love your website&body=Howdy, I just wanted to say your website is incredible"
