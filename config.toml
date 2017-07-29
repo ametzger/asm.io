@@ -18,7 +18,7 @@ ignoreFiles = [ "\\.gitkeep$" ]
 [[params.social]]
   medium = "Emoji"
   icon = "smile-o"
-  link = "https://asm.io/emoji"
+  link = "https://asm.io/emoji.html"
 
 [[params.social]]
   medium = "Twitter"
