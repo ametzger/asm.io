@@ -2,6 +2,10 @@ languageCode = "en-us"
 title = "Alex Metzger"
 baseurl = "https://asm.io/"
 theme = "aerial"
+enableRobotsTXT = true
+disableHugoGeneratorInject = false
+disableRSS = true
+googleAnalytics = "UA-71888221-1"
 
 [params]
   name = "Alex Metzger"
@@ -21,13 +25,18 @@ theme = "aerial"
   link = "https://twitter.com/metzger"
 
 [[params.social]]
+  medium = "Instagram"
+  icon = "instagram"
+  link = "https://www.instagram.com/emptycupofrum"
+
+[[params.social]]
   medium = "Github"
   icon = "github"
   link = "https://github.com/ametzger"
 
 [[params.social]]
   medium = "LinkedIn"
-  icon = "linkedin-square"
+  icon = "linkedin"
   link = "https://www.linkedin.com/in/asmetzger"
 
 [[params.social]]
