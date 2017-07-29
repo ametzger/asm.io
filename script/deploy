@@ -3,6 +3,6 @@ set -e
 
 script/generate
 
-aws s3 sync public s3://asm.io --delete
+aws s3 sync public s3://asm.io # --delete # don't remove files in the S3 bucket but not local
 
 echo "Finished deploy"
