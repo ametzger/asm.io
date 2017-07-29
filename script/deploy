@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+script/generate
+
+aws s3 sync public s3://asm.io --delete
+
+echo "Finished deploy"
