@@ -36,6 +36,11 @@ ignoreFiles = [ "\\.gitkeep$" ]
   link = "https://github.com/ametzger"
 
 [[params.social]]
+  medium = "Keybase"
+  icon = "key"
+  link = "https://keybase.io/asm"
+
+[[params.social]]
   medium = "LinkedIn"
   icon = "linkedin"
   link = "https://www.linkedin.com/in/asmetzger"
