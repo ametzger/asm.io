@@ -4,7 +4,7 @@ baseurl = "https://asm.io/"
 theme = "aerial"
 enableRobotsTXT = true
 disableHugoGeneratorInject = false
-disableRSS = true
+disableKinds=[ "RSS" ]
 googleAnalytics = "UA-71888221-1"
 ignoreFiles = [ "\\.gitkeep$" ]
 
