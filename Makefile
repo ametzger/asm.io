@@ -21,7 +21,7 @@ clean: ## Cleanup generated files
 
 build: ## Build the static version of the site
 	@echo '$(COLOR_GREEN)==> Building ${SITE_URL}$(COLOR_NONE)'
-	@hugo --baseURL="//${SITE_URL}" --destination "${OUTPUT_DIR}" --gc
+	@hugo --baseURL="//${SITE_URL}" --destination "${OUTPUT_DIR}" --gc --minify
 
 serve: ## Start a local development server
 	@echo '$(COLOR_GREEN)==> Starting local server$(COLOR_NONE)'
@@ -34,3 +34,11 @@ sync: ## Synchronize local static output with live site
 	@aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths /\*
 
 deploy: clean build sync ## Build and deploy the site to AWS
+
+provision: ## Provision requisite AWS resources
+	@echo '$(COLOR_GREEN)==> Provisioning ${SITE_URL} infrastructure$(COLOR_NONE)'
+	@cd infra && terraform apply
+
+preprovision: ## Show proposed changes to AWS resources
+	@echo '$(COLOR_GREEN)==> Inspecting ${SITE_URL} infrastructure$(COLOR_NONE)'
+	@cd infra && terraform plan
