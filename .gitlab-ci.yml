@@ -1,0 +1,11 @@
+before_script:
+  - apt-get update -qq && apt-get install -y -qq make awscli hugo
+  - hugo version
+  - aws --version
+  - make --version
+
+upgrade:
+  script:
+    - echo "SITE_URL=$SITE_URL" >> prod.env
+    - echo "CLOUDFRONT_DISTRIBUTION_ID=$CLOUDFRONT_DISTRIBUTION_ID" >> prod.env
+    - make deploy
