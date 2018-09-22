@@ -17,6 +17,7 @@ help:
 clean: ## Cleanup generated files
 	@echo '$(COLOR_GREEN)==> Cleaning up ${SITE_URL} artifacts$(COLOR_NONE)'
 	@rm -rf $(OUTPUT_DIR)
+	@rm -rf resources
 
 build: ## Build the static version of the site
 	@echo '$(COLOR_GREEN)==> Building ${SITE_URL}$(COLOR_NONE)'
