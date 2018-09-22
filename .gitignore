@@ -1,6 +1,8 @@
-# Hugo default output directory
-/public
+# Don't check in compiled static HTML
+/dist
 
 # OSX
 .DS_Store
-.env
+
+# Ignore prod configuration file
+prod.env
