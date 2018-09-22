@@ -31,6 +31,11 @@ ignoreFiles = [ "\\.gitkeep$" ]
   link = "https://www.instagram.com/emptycupofrum"
 
 [[params.social]]
+  medium = "Gitlab"
+  icon = "gitlab"
+  link = "https://gitlab.com/ametzger"
+
+[[params.social]]
   medium = "Github"
   icon = "github"
   link = "https://github.com/ametzger"
