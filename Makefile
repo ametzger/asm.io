@@ -21,7 +21,7 @@ clean: ## Cleanup generated files
 
 build: ## Build the static version of the site
 	@echo '$(COLOR_GREEN)==> Building ${SITE_URL}$(COLOR_NONE)'
-	@hugo --baseURL="//${SITE_URL}" --destination "${OUTPUT_DIR}" --gc --minify
+	@hugo --baseURL="//${SITE_URL}" --destination "${OUTPUT_DIR}" --minify
 
 serve: ## Start a local development server
 	@echo '$(COLOR_GREEN)==> Starting local server$(COLOR_NONE)'
