@@ -9,6 +9,6 @@ variable "site_url" {
 }
 
 variable "additional_urls" {
-  default = ["metzger.lol"]
+  default = []
   description = "Alternate URLs that should point to site"
 }

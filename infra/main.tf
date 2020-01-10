@@ -1,6 +1,7 @@
 provider "aws" {
   profile = "personal"
-  region = "${var.aws_region}"
+  region  = "${var.aws_region}"
+  version = "~> 2.43.0"
 }
 
 ################################################################################
@@ -46,7 +47,8 @@ resource "aws_s3_bucket" "main" {
 
 resource "aws_s3_bucket_policy" "main_public" {
   bucket = "${aws_s3_bucket.main.id}"
-  policy =<<POLICY
+
+  policy = <<POLICY
 {
   "Version":"2012-10-17",
   "Statement":[{
@@ -92,6 +94,57 @@ resource "aws_acm_certificate_validation" "main" {
 }
 
 ################################################################################
+# Lambda #######################################################################
+################################################################################
+provider "archive" {}
+
+resource "aws_iam_role" "lambda_role" {
+  name = "web-lambda-role"
+
+  assume_role_policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "Service": "lambda.amazonaws.com"
+        },
+        "Effect": "Allow"
+      },
+      {
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "Service": "edgelambda.amazonaws.com"
+        },
+        "Effect": "Allow"
+      }
+    ]
+  }
+  EOF
+}
+
+data "archive_file" "http_headers_lambda" {
+  type        = "zip"
+  source_file = "${path.module}/http-headers.js"
+  output_path = "http-headers.zip"
+}
+
+resource "aws_lambda_function" "http_headers" {
+  function_name    = "web-http-headers"
+  role             = "${aws_iam_role.lambda_role.arn}"
+  handler          = "http-headers.handler"
+  runtime          = "nodejs10.x"
+  publish          = true
+  filename         = "${data.archive_file.http_headers_lambda.output_path}"
+  source_code_hash = "${data.archive_file.http_headers_lambda.output_base64sha256}"
+}
+
+resource "aws_cloudwatch_log_group" "http_headers" {
+  name = "/aws/lambda/${aws_lambda_function.http_headers.function_name}"
+}
+
+################################################################################
 # CloudFront ###################################################################
 ################################################################################
 locals {
@@ -104,9 +157,10 @@ resource "aws_cloudfront_distribution" "main" {
     origin_id   = "${local.s3_origin_id}"
   }
 
-  enabled = true
-  is_ipv6_enabled = true
+  enabled             = true
+  is_ipv6_enabled     = true
   default_root_object = "index.html"
+  wait_for_deployment = false
 
   aliases = ["${var.site_url}", "www.${var.site_url}"]
 
@@ -124,6 +178,12 @@ resource "aws_cloudfront_distribution" "main" {
       }
     }
 
+    lambda_function_association {
+      event_type   = "origin-response"
+      lambda_arn   = "${aws_lambda_function.http_headers.qualified_arn}"
+      include_body = false
+    }
+
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
@@ -131,14 +191,15 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = "${aws_acm_certificate.main.arn}"
-    ssl_support_method  = "sni-only"
+    acm_certificate_arn      = "${aws_acm_certificate.main.arn}"
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2018"
   }
 
   logging_config {
     include_cookies = false
-    bucket = "${aws_s3_bucket.logs.bucket_domain_name}"
-    prefix = "cdn-${var.site_url}"
+    bucket          = "${aws_s3_bucket.logs.bucket_domain_name}"
+    prefix          = "cdn-${var.site_url}"
   }
 
   restrictions {
