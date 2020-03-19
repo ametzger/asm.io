@@ -18,11 +18,13 @@ exports.handler = (event, context, callback) => {
     add(headers, "X-XSS-Protection", "1; mode=block");
     add(headers, "X-Frame-Options", "DENY");
     add(headers, "Referrer-Policy", "no-referrer-when-downgrade");
+
+    console.log(headers);
+
     callback(null, response);
 };
 
 // Uncomment below to test
-/*
 exports.handler({
   "Records": [
     {
@@ -58,4 +60,3 @@ exports.handler({
     }
   ]
 }, {}, (_, __) => {});
-*/

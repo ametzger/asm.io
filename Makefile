@@ -1,7 +1,3 @@
-cnf ?= prod.env
-include $(cnf)
-export $(shell sed 's/=.*//' $(cnf))
-
 OUTPUT_DIR:=dist
 
 COLOR_GREEN=$(shell echo "\033[0;32m")
@@ -35,10 +31,10 @@ sync: ## Synchronize local static output with live site
 
 deploy: clean build sync ## Build and deploy the site to AWS
 
-provision: ## Provision requisite AWS resources
+tf-apply: ## Provision requisite AWS resources
 	@echo '$(COLOR_GREEN)==> Provisioning ${SITE_URL} infrastructure$(COLOR_NONE)'
 	@cd infra && terraform apply
 
-preprovision: ## Show proposed changes to AWS resources
+tf-plan: ## Show proposed changes to AWS resources
 	@echo '$(COLOR_GREEN)==> Inspecting ${SITE_URL} infrastructure$(COLOR_NONE)'
 	@cd infra && terraform plan

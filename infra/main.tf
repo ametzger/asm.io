@@ -125,8 +125,13 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 data "archive_file" "http_headers_lambda" {
-  type        = "zip"
-  source_file = "${path.module}/http-headers.js"
+  type = "zip"
+
+  source {
+    content  = "${file("${path.module}/http-headers.js")}"
+    filename = "http-headers.js"
+  }
+
   output_path = "http-headers.zip"
 }
 
@@ -153,8 +158,12 @@ locals {
 
 resource "aws_cloudfront_distribution" "main" {
   origin {
-    domain_name = "${aws_s3_bucket.main.bucket_regional_domain_name}"
-    origin_id   = "${local.s3_origin_id}"
+    # HACK: This doesn't appear to actually give the regional domain,
+    # so manually construct it.
+    # domain_name = "${aws_s3_bucket.main.bucket_regional_domain_name}"
+    domain_name = "${aws_s3_bucket.main.bucket}.s3-website-${var.aws_region}.amazonaws.com"
+
+    origin_id = "${local.s3_origin_id}"
   }
 
   enabled             = true
@@ -207,6 +216,11 @@ resource "aws_cloudfront_distribution" "main" {
       restriction_type = "whitelist"
       locations        = ["US", "CA"]
     }
+  }
+
+  lifecycle {
+    # HACK: Terraform seems to fuck this up, not sure why.
+    ignore_changes = ["origin"]
   }
 }
 
