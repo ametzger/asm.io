@@ -1,5 +1,6 @@
 # Don't check in compiled static HTML
 /dist
+/public
 
 # OSX
 .DS_Store
@@ -16,3 +17,6 @@ prod.env
 
 # Crash log files
 crash.log
+
+# Generated files
+**/_gen/*
