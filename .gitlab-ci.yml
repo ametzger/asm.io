@@ -2,8 +2,8 @@ image: fedora:latest
 
 before_script:
   - dnf install -y curl make awscli
-  - curl -L https://github.com/gohugoio/hugo/releases/download/v0.48/hugo_0.48_Linux-64bit.tar.gz > /tmp/hugo.tar.gz
-  - tar xvzf /tmp/hugo.tar.gz hugo 
+  - curl -L https://github.com/gohugoio/hugo/releases/download/v0.63.2/hugo_0.63.2_Linux-64bit.tar.gz > /tmp/hugo.tar.gz
+  - tar xvzf /tmp/hugo.tar.gz hugo
   - mv hugo /usr/bin/hugo
   - hugo version
   - aws --version
