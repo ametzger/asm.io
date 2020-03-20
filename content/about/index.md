@@ -10,8 +10,7 @@ Boston, Massachusetts.
 
 I currently work at [Jellyfish](https://jellyfish.co/), a startup
 providing software engineering analytics tooling. If you're interested
-in working with me, don't hesitate to [reach out]({{< ref "/contact/"
->}}).
+in working with me, don't hesitate to [reach out](/contact/).
 
 Previously, I worked at [Litmus](https://litmus.com), [NGP
 VAN](https://ngpvan.com), and [C Space](https://cspace.com). I did a
