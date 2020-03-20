@@ -25,9 +25,10 @@ serve: ## Start a local development server
 
 sync: ## Synchronize local static output with live site
 	@echo '$(COLOR_GREEN)==> Syncing ${OUTPUT_DIR} contents to S3 bucket ${SITE_URL}$(COLOR_NONE)'
-	@aws s3 sync ${OUTPUT_DIR} s3://${SITE_URL}
+	@aws s3 sync --delete ${OUTPUT_DIR} s3://${SITE_URL} --acl public-read
+	@s3cmd --recursive modify --add-header="Cache-Control:max-age=86400" s3://${SITE_URL}
 	@echo '$(COLOR_GREEN)==> Invalidating ${SITE_URL} CloudFront distribution$(COLOR_NONE)'
-	@aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths /\*
+	@aws cloudfront create-invalidation --distribution-id=${CLOUDFRONT_DISTRIBUTION_ID} --paths /\* >/dev/null 2>&1
 
 deploy: clean build sync ## Build and deploy the site to AWS
 

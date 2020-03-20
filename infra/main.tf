@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "main" {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "HEAD"]
     allowed_origins = ["*"]
-    expose_headers  = ["ETag"]
+    expose_headers  = ["ETag", "Content-Length"]
     max_age_seconds = 3000
   }
 
