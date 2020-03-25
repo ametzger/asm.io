@@ -3,7 +3,7 @@ OUTPUT_DIR:=dist
 COLOR_GREEN=$(shell echo "\033[0;32m")
 COLOR_NONE=$(shell echo "\033[0m")
 
-.PHONY: help
+.PHONY: help clean build serve sync deploy tf-apply tf-plan
 
 help:
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -17,7 +17,7 @@ clean: ## Cleanup generated files
 
 build: ## Build the static version of the site
 	@echo '$(COLOR_GREEN)==> Building ${SITE_URL}$(COLOR_NONE)'
-	@hugo --baseURL="//${SITE_URL}" --destination "${OUTPUT_DIR}" --minify
+	@hugo --baseURL="https://${SITE_URL}" --destination "${OUTPUT_DIR}" --minify
 
 serve: ## Start a local development server
 	@echo '$(COLOR_GREEN)==> Starting local server$(COLOR_NONE)'

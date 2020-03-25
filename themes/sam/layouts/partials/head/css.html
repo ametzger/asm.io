@@ -16,3 +16,6 @@
 {{ $style := resources.Get . }}
 <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}" crossorigin="anonymous" media="screen">
 {{- end }}
+
+{{/* fonts */}}
+<link rel="stylesheet" href="{{ "/assets/inter.css" | absURL }}">

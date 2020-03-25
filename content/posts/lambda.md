@@ -2,12 +2,8 @@
 draft = false
 date = 2020-03-19T20:43:53-04:00
 title = "AWS Lambda: A Gift and a Curse"
-description = "A rant about AWS Lambda and cloud UX in general"
 slug = "lambda"
-tags = ["aws", "lambda"]
-categories = []
-externalLink = ""
-series = []
+tags = []
 +++
 
 A few weeks ago I was procrastinating doing real work and decided to

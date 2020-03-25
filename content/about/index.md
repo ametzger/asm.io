@@ -1,9 +1,9 @@
 ---
-title: About
+title: about
 slug: about
 ---
 
-![Portrait](/assets/header-about.jpg)
+![Portrait](/about/images/header.jpg)
 
 Howdy! I'm Alex. I'm a software developer from Boston, Massachusetts.
 
