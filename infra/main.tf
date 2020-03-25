@@ -1,3 +1,14 @@
+terraform {
+  required_version = "~> 0.11.14"
+
+  backend "s3" {
+    region  = "us-east-1"
+    bucket  = "asm-private"
+    key     = "asm.io.tfstate"
+    encrypt = true
+  }
+}
+
 provider "aws" {
   profile = "personal"
   region  = "${var.aws_region}"
