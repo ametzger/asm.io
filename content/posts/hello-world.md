@@ -1,14 +1,10 @@
-+++
-draft = false
-date = 2020-03-19T15:45:06-04:00
-title = "Hello, World!"
-description = ""
-slug = "hello-world"
-tags = []
-categories = []
-externalLink = ""
-series = []
-+++
+---
+title: "Hello, World!"
+draft: false
+date: 2020-03-19T15:45:06-04:00
+showDate: false
+slug: "hello-world"
+---
 
 Howdy! This is my blog. As this is my first post, I thought I'd
 describe how it is set up and what is good/bad about it.
