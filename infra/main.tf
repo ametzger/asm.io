@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 0.11.14"
+  required_version = ">=0.12"
 
   backend "s3" {
     region  = "us-east-1"
@@ -11,8 +11,7 @@ terraform {
 
 provider "aws" {
   profile = "personal"
-  region  = "${var.aws_region}"
-  version = "~> 2.43.0"
+  region  = var.aws_region
 }
 
 ################################################################################
@@ -34,43 +33,13 @@ resource "aws_s3_bucket" "logs" {
 }
 
 resource "aws_s3_bucket" "main" {
-  bucket = "${var.site_url}"
-  acl    = "public-read"
-
-  website {
-    index_document = "index.html"
-    error_document = "404.html"
-  }
-
-  cors_rule {
-    allowed_headers = ["*"]
-    allowed_methods = ["GET", "HEAD"]
-    allowed_origins = ["*"]
-    expose_headers  = ["ETag", "Content-Length"]
-    max_age_seconds = 3000
-  }
+  bucket = var.site_url
+  acl    = "private"
 
   logging {
-    target_bucket = "${aws_s3_bucket.logs.id}"
+    target_bucket = aws_s3_bucket.logs.id
     target_prefix = "logs/"
   }
-}
-
-resource "aws_s3_bucket_policy" "main_public" {
-  bucket = "${aws_s3_bucket.main.id}"
-
-  policy = <<POLICY
-{
-  "Version":"2012-10-17",
-  "Statement":[{
-    "Sid":"AllowPublicAccess",
-    "Effect":"Allow",
-	  "Principal": "*",
-    "Action":["s3:GetObject"],
-    "Resource":["arn:aws:s3:::${var.site_url}/*"]
-  }]
-}
-POLICY
 }
 
 ################################################################################
@@ -78,12 +47,12 @@ POLICY
 ################################################################################
 
 resource "aws_acm_certificate" "main" {
-  domain_name               = "${var.site_url}"
+  domain_name               = var.site_url
   subject_alternative_names = ["*.${var.site_url}"]
   validation_method         = "DNS"
 
-  tags {
-    Name = "${var.site_url}"
+  tags = {
+    Name = var.site_url
   }
 
   lifecycle {
@@ -91,23 +60,33 @@ resource "aws_acm_certificate" "main" {
   }
 }
 
-resource "aws_route53_record" "main_validation" {
-  name    = "${aws_acm_certificate.main.domain_validation_options.0.resource_record_name}"
-  type    = "${aws_acm_certificate.main.domain_validation_options.0.resource_record_type}"
-  zone_id = "${data.aws_route53_zone.main.id}"
-  records = ["${aws_acm_certificate.main.domain_validation_options.0.resource_record_value}"]
-  ttl     = 60
+resource "aws_route53_record" "main" {
+  for_each = {
+    for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = data.aws_route53_zone.main.zone_id
 }
 
 resource "aws_acm_certificate_validation" "main" {
-  certificate_arn         = "${aws_acm_certificate.main.arn}"
-  validation_record_fqdns = ["${aws_route53_record.main_validation.fqdn}"]
+  certificate_arn         = aws_acm_certificate.main.arn
+  validation_record_fqdns = [for record in aws_route53_record.main : record.fqdn]
 }
 
 ################################################################################
 # Lambda #######################################################################
 ################################################################################
-provider "archive" {}
+provider "archive" {
+}
 
 resource "aws_iam_role" "lambda_role" {
   name = "web-lambda-role"
@@ -132,32 +111,33 @@ resource "aws_iam_role" "lambda_role" {
       }
     ]
   }
-  EOF
+EOF
+
 }
 
-data "archive_file" "http_headers_lambda" {
+data "archive_file" "url_rewrite_lambda" {
   type = "zip"
 
   source {
-    content  = "${file("${path.module}/http-headers.js")}"
-    filename = "http-headers.js"
+    content  = file("${path.module}/url-rewrite.js")
+    filename = "url-rewrite.js"
   }
 
-  output_path = "http-headers.zip"
+  output_path = "url-rewrite.zip"
 }
 
-resource "aws_lambda_function" "http_headers" {
-  function_name    = "web-http-headers"
-  role             = "${aws_iam_role.lambda_role.arn}"
-  handler          = "http-headers.handler"
-  runtime          = "nodejs10.x"
+resource "aws_lambda_function" "url_rewrite" {
+  function_name    = "web-url_rewrite"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "url-rewrite.handler"
+  runtime          = "nodejs14.x"
   publish          = true
-  filename         = "${data.archive_file.http_headers_lambda.output_path}"
-  source_code_hash = "${data.archive_file.http_headers_lambda.output_base64sha256}"
+  filename         = data.archive_file.url_rewrite_lambda.output_path
+  source_code_hash = data.archive_file.url_rewrite_lambda.output_base64sha256
 }
 
-resource "aws_cloudwatch_log_group" "http_headers" {
-  name = "/aws/lambda/${aws_lambda_function.http_headers.function_name}"
+resource "aws_cloudwatch_log_group" "url_rewrite" {
+  name = "/aws/lambda/${aws_lambda_function.url_rewrite.function_name}"
 }
 
 ################################################################################
@@ -167,14 +147,18 @@ locals {
   s3_origin_id = "${var.site_url}-S3"
 }
 
+resource "aws_cloudfront_origin_access_identity" "main" {
+  comment = "${var.site_url} origin access identity"
+}
+
 resource "aws_cloudfront_distribution" "main" {
   origin {
-    # HACK: This doesn't appear to actually give the regional domain,
-    # so manually construct it.
-    # domain_name = "${aws_s3_bucket.main.bucket_regional_domain_name}"
-    domain_name = "${aws_s3_bucket.main.bucket}.s3-website-${var.aws_region}.amazonaws.com"
+    domain_name = aws_s3_bucket.main.bucket_regional_domain_name
+    origin_id   = local.s3_origin_id
 
-    origin_id = "${local.s3_origin_id}"
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.main.cloudfront_access_identity_path
+    }
   }
 
   enabled             = true
@@ -182,12 +166,12 @@ resource "aws_cloudfront_distribution" "main" {
   default_root_object = "index.html"
   wait_for_deployment = false
 
-  aliases = ["${var.site_url}", "www.${var.site_url}"]
+  aliases = [var.site_url, "www.${var.site_url}"]
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = "${local.s3_origin_id}"
+    target_origin_id = local.s3_origin_id
     compress         = true
 
     forwarded_values {
@@ -199,8 +183,8 @@ resource "aws_cloudfront_distribution" "main" {
     }
 
     lambda_function_association {
-      event_type   = "origin-response"
-      lambda_arn   = "${aws_lambda_function.http_headers.qualified_arn}"
+      event_type   = "origin-request"
+      lambda_arn   = aws_lambda_function.url_rewrite.qualified_arn
       include_body = false
     }
 
@@ -211,14 +195,14 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = "${aws_acm_certificate.main.arn}"
+    acm_certificate_arn      = aws_acm_certificate.main.arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2018"
   }
 
   logging_config {
     include_cookies = false
-    bucket          = "${aws_s3_bucket.logs.bucket_domain_name}"
+    bucket          = aws_s3_bucket.logs.bucket_domain_name
     prefix          = "cdn-${var.site_url}"
   }
 
@@ -231,8 +215,25 @@ resource "aws_cloudfront_distribution" "main" {
 
   lifecycle {
     # HACK: Terraform seems to fuck this up, not sure why.
-    ignore_changes = ["origin"]
+    ignore_changes = [origin]
   }
+}
+
+data "aws_iam_policy_document" "cloudfront_access" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.main.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.main.iam_arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "main" {
+  bucket = aws_s3_bucket.main.id
+  policy = data.aws_iam_policy_document.cloudfront_access.json
 }
 
 ################################################################################
@@ -240,53 +241,49 @@ resource "aws_cloudfront_distribution" "main" {
 ################################################################################
 
 resource "aws_route53_record" "naked" {
-  zone_id = "${data.aws_route53_zone.main.zone_id}"
-  name    = "${var.site_url}"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.site_url
   type    = "A"
 
   alias {
-    name                   = "${aws_cloudfront_distribution.main.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.main.hosted_zone_id}"
+    name                   = aws_cloudfront_distribution.main.domain_name
+    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
     evaluate_target_health = false
   }
 }
 
 resource "aws_route53_record" "nakedv6" {
-  zone_id = "${data.aws_route53_zone.main.zone_id}"
-  name    = "${var.site_url}"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.site_url
   type    = "AAAA"
 
   alias {
-    name                   = "${aws_cloudfront_distribution.main.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.main.hosted_zone_id}"
+    name                   = aws_cloudfront_distribution.main.domain_name
+    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
     evaluate_target_health = false
   }
 }
 
-# TODO: this is busted with CORS errors.
-# resource "aws_route53_record" "www" {
-#   zone_id = "${data.aws_route53_zone.main.zone_id}"
-#   name    = "www.${var.site_url}"
-#   type    = "A"
+resource "aws_route53_record" "www" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.${var.site_url}"
+  type    = "A"
 
+  alias {
+    name                   = aws_cloudfront_distribution.main.domain_name
+    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
 
-#   alias {
-#     name                   = "${aws_cloudfront_distribution.main.domain_name}"
-#     zone_id                = "${aws_cloudfront_distribution.main.hosted_zone_id}"
-#     evaluate_target_health = false
-#   }
-# }
+resource "aws_route53_record" "wwwv6" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.${var.site_url}"
+  type    = "AAAA"
 
-
-# resource "aws_route53_record" "wwwv6" {
-#   zone_id = "${data.aws_route53_zone.main.zone_id}"
-#   name    = "www.${var.site_url}"
-#   type    = "AAAA"
-
-
-#   alias {
-#     name                   = "${aws_cloudfront_distribution.main.domain_name}"
-#     zone_id                = "${aws_cloudfront_distribution.main.hosted_zone_id}"
-#     evaluate_target_health = false
-#   }
-# }
+  alias {
+    name                   = aws_cloudfront_distribution.main.domain_name
+    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
+    evaluate_target_health = false
+  }
+}

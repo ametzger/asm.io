@@ -20,3 +20,5 @@ crash.log
 
 # Generated files
 **/_gen/*
+/infra/.terraform.lock.hcl
+/infra/versions.tf

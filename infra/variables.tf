@@ -12,3 +12,4 @@ variable "additional_urls" {
   default     = []
   description = "Alternate URLs that should point to site"
 }
+
