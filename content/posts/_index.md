@@ -1,4 +1,0 @@
----
-title: posts
-slug: posts
----
