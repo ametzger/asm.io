@@ -212,11 +212,6 @@ resource "aws_cloudfront_distribution" "main" {
       locations        = ["US", "CA"]
     }
   }
-
-  lifecycle {
-    # HACK: Terraform seems to fuck this up, not sure why.
-    ignore_changes = [origin]
-  }
 }
 
 data "aws_iam_policy_document" "cloudfront_access" {
