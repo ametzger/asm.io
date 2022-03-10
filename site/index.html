@@ -37,7 +37,7 @@
     <meta property="og:updated_time" content="2020-03-24T15:47:33-04:00">
     <meta property="og:site_name" content="Alex Metzger">
 
-    <style>
+    <style nonce="MPoBxZwSEjjnUsr">
      body {
        display: flex;
        height: 100%;
@@ -91,73 +91,78 @@
   </head>
   <body>
     <div class="emoji-container">
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
-      <span class="emoji" onclick="allEmoji(this)">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
+      <span class="emoji">😁</span>
     </div>
   </body>
 
-  <script type="text/javascript">
-   var getRandomElement = function(arr) {
-     return arr[Math.floor(Math.random() * arr.length)];
-   }
-   var switchEmoji = function(element, newEmoji) {
+  <script type="text/javascript" nonce="e4LhAepsKDMbiwG">
+   const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+   const switchEmoji = (element, newEmoji) => {
      if (typeof(newEmoji) == 'undefined') {
        newEmoji = getRandomElement(emj);
      }
      element.innerText = newEmoji;
    }
-   var allEmoji = function(element) {
+
+   const allEmoji = (event) => {
+     let element = event.target;
      var newEmoji = element.innerText;
      for (var i = 0; i < emojiDisplay.length; i++) {
        switchEmoji(emojiDisplay[i], newEmoji);
      }
    }
-   var emojiDisplay = document.getElementsByClassName('emoji');
-   var emojitize = function() {
+
+   let emojiDisplay = document.getElementsByClassName('emoji');
+
+   const emojitize = () => {
      switchEmoji(getRandomElement(emojiDisplay))
    }
-   var EMOJI_SPEED = 75;
-   var emojiInterval = setInterval(emojitize, EMOJI_SPEED);
-   var running = true;
-   var toggle = function() {
+
+   const EMOJI_SPEED = 75;
+   let emojiInterval = setInterval(emojitize, EMOJI_SPEED);
+   let running = true;
+
+   const toggle = () => {
      if (!running) {
        emojiInterval = setInterval(emojitize, EMOJI_SPEED);
      } else {
@@ -165,12 +170,16 @@
      }
      running = !running;
    }
-   document.addEventListener("keypress", function(e) {
+
+   Array.from(document.getElementsByClassName("emoji")).forEach(el => el.addEventListener('click', allEmoji));
+
+   document.addEventListener("keypress", (e) => {
      if (e.keyCode === 32) {
        toggle();
      }
    });
-   var emj = [
+
+   const emj = [
      String.fromCodePoint(0x1F601),
      String.fromCodePoint(0x1F602),
      String.fromCodePoint(0x1F603),
