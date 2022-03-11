@@ -18,17 +18,27 @@ data "aws_route53_zone" "main" {
 
 resource "aws_s3_bucket" "logs" {
   bucket = "${var.site_url}-logs"
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  bucket = aws_s3_bucket.logs.id
   acl    = "log-delivery-write"
 }
 
 resource "aws_s3_bucket" "main" {
   bucket = var.site_url
-  acl    = "private"
+}
 
-  logging {
-    target_bucket = aws_s3_bucket.logs.id
-    target_prefix = "logs/"
-  }
+resource "aws_s3_bucket_acl" "main" {
+  bucket = aws_s3_bucket.main.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_logging" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "logs/"
 }
 
 ################################################################################
