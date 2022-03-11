@@ -142,7 +142,8 @@ resource "aws_cloudwatch_log_group" "url_rewrite" {
 # CloudFront ###################################################################
 ################################################################################
 locals {
-  s3_origin_id = "${var.site_url}-S3"
+  s3_origin_id    = "${var.site_url}-S3"
+  s3_regional_url = "${aws_s3_bucket.main.bucket}.s3.${var.aws_region}.amazonaws.com"
 }
 
 resource "aws_cloudfront_origin_access_identity" "main" {
@@ -151,7 +152,10 @@ resource "aws_cloudfront_origin_access_identity" "main" {
 
 resource "aws_cloudfront_distribution" "main" {
   origin {
-    domain_name = aws_s3_bucket.main.bucket_regional_domain_name
+    # HACK(asm,2022-03-10): This version of the AWS provider seems to
+    # give a non-regional URL for this, so hack around that.
+    # domain_name = aws_s3_bucket.main.bucket_regional_domain_name
+    domain_name = local.s3_regional_url
     origin_id   = local.s3_origin_id
 
     s3_origin_config {
