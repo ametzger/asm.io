@@ -1,0 +1,2 @@
+export TF_VAR_aws_region=<redacted>
+export TF_VAR_site_url=<redacted>

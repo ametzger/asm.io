@@ -1,0 +1,8 @@
+terraform {
+  backend "s3" {
+    region  = "<redacted>"
+    bucket  = "<redacted>"
+    key     = "<redacted>"
+    encrypt = true
+  }
+}
