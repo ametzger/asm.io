@@ -1,14 +1,3 @@
-terraform {
-  required_version = ">=0.12"
-
-  backend "s3" {
-    region  = "us-east-1"
-    bucket  = "asm-private"
-    key     = "asm.io.tfstate"
-    encrypt = true
-  }
-}
-
 provider "aws" {
   profile = "personal"
   region  = var.aws_region
@@ -85,8 +74,7 @@ resource "aws_acm_certificate_validation" "main" {
 ################################################################################
 # Lambda #######################################################################
 ################################################################################
-provider "archive" {
-}
+provider "archive" {}
 
 resource "aws_iam_role" "lambda_role" {
   name = "web-lambda-role"
@@ -188,6 +176,8 @@ resource "aws_cloudfront_distribution" "main" {
       include_body = false
     }
 
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security-headers.id
+
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
@@ -210,6 +200,46 @@ resource "aws_cloudfront_distribution" "main" {
     geo_restriction {
       restriction_type = "whitelist"
       locations        = ["US", "CA"]
+    }
+  }
+}
+
+resource "aws_cloudfront_response_headers_policy" "security-headers" {
+  name = "asm-security-headers"
+
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      include_subdomains         = true
+      preload                    = true
+      override                   = true
+    }
+
+    xss_protection {
+      mode_block = true
+      override   = true
+      protection = true
+    }
+
+    content_type_options {
+      override = true
+    }
+
+    referrer_policy {
+      referrer_policy = "same-origin"
+
+      override = true
+    }
+    frame_options {
+      frame_option = "DENY"
+
+      override = true
+    }
+
+    content_security_policy {
+      content_security_policy = "default-src 'self'; script-src 'unsafe-inline' 'nonce-e4LhAepsKDMbiwG'; style-src 'nonce-MPoBxZwSEjjnUsr'; manifest-src 'self'; base-uri 'self'; object-src 'none';"
+
+      override = true
     }
   }
 }
