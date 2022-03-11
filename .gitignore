@@ -1,24 +1,21 @@
-# Don't check in compiled static HTML
-/dist
-/public
-
 # OSX
 .DS_Store
 
-# Ignore prod configuration file
-prod.env
-
 # Local .terraform directories
 **/.terraform/*
+
+# built terraform lambdas
+infra/*.zip
 
 # .tfstate files
 *.tfstate
 *.tfstate.*
 
-# Crash log files
-crash.log
+# log files
+**/*.log
 
-# Generated files
-**/_gen/*
-/infra/.terraform.lock.hcl
-/infra/versions.tf
+# direnv
+.envrc
+
+# private terraform config
+/infra/backend.tf
