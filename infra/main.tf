@@ -7,6 +7,8 @@ provider "aws" {
 # Existing Data ################################################################
 ################################################################################
 
+data "aws_canonical_user_id" "current" {}
+
 data "aws_route53_zone" "main" {
   name         = "${var.site_url}."
   private_zone = false
@@ -22,7 +24,57 @@ resource "aws_s3_bucket" "logs" {
 
 resource "aws_s3_bucket_acl" "logs" {
   bucket = aws_s3_bucket.logs.id
-  acl    = "log-delivery-write"
+
+  access_control_policy {
+    grant {
+      grantee {
+        type = "Group"
+        uri  = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+      }
+
+      permission = "READ_ACP"
+    }
+
+    grant {
+      grantee {
+        type = "Group"
+        uri  = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+      }
+
+      permission = "WRITE"
+    }
+
+    # cloudfront log delivery
+    grant {
+      grantee {
+        id   = "c4c1ede66af53448b93c283ce9448c4ba468c9432aa01d700d3878632f77d2d0"
+        type = "CanonicalUser"
+      }
+
+      permission = "FULL_CONTROL"
+    }
+
+    grant {
+      grantee {
+        id   = data.aws_canonical_user_id.current.id
+        type = "CanonicalUser"
+      }
+
+      permission = "FULL_CONTROL"
+    }
+
+    owner {
+      id = data.aws_canonical_user_id.current.id
+    }
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "example" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
 
 resource "aws_s3_bucket" "main" {
