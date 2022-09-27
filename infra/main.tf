@@ -274,6 +274,21 @@ resource "aws_cloudfront_distribution" "main" {
       locations        = ["US", "CA"]
     }
   }
+
+  dynamic "custom_error_response" {
+    for_each = concat(
+      [400, 403, 404, 405, 414, 416],
+      range(500, 504)
+    )
+    iterator = error_code
+
+    content {
+      error_code            = error_code.value
+      response_code         = error_code.value
+      response_page_path    = "/err.html"
+      error_caching_min_ttl = 30
+    }
+  }
 }
 
 resource "aws_cloudfront_response_headers_policy" "security_headers" {
