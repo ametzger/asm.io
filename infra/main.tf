@@ -248,7 +248,7 @@ resource "aws_cloudfront_distribution" "main" {
       include_body = false
     }
 
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security-headers.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers.id
 
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
@@ -276,7 +276,7 @@ resource "aws_cloudfront_distribution" "main" {
   }
 }
 
-resource "aws_cloudfront_response_headers_policy" "security-headers" {
+resource "aws_cloudfront_response_headers_policy" "security_headers" {
   name = "asm-security-headers"
 
   security_headers_config {
