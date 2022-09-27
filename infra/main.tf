@@ -1,6 +1,5 @@
 provider "aws" {
-  profile = "personal"
-  region  = var.aws_region
+  region = var.aws_region
 }
 
 ################################################################################
@@ -67,9 +66,16 @@ resource "aws_s3_bucket_acl" "logs" {
       id = data.aws_canonical_user_id.current.id
     }
   }
+
+  lifecycle {
+    # NOTE(asm,2022-09-27): This conflicts with the access_control_policy element, but terraform
+    # still wants to change it. I don't _think_ it matters, it's currently set to
+    # `log-delivery-write` on the bucket.
+    ignore_changes = [acl]
+  }
 }
 
-resource "aws_s3_bucket_ownership_controls" "example" {
+resource "aws_s3_bucket_ownership_controls" "logs" {
   bucket = aws_s3_bucket.logs.id
 
   rule {
