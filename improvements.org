@@ -1,0 +1,8 @@
+- idea: add timer, see how long user can keep a majority of emoji as the same one
+
+- move to scheme where emojis pause once clicked
+  - clicking an emoji still changes all of them to the same emoji
+  - clicking an emoji keeps that emoji as the same one always, and resumes swapping it if it is
+    clicked again
+- move to separate script file?
+  - need to update content-security-policy
