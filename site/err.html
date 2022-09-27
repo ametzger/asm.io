@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>huh?</title>
+
+    <meta charset="utf-8">
+
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/img/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/img/android-icon-192x192.png" sizes="192x192">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/img/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/img/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/img/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/img/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/img/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/img/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/img/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon-180x180.png">
+
+    <link rel="manifest" href="/manifest.json">
+
+    <meta name=description content="alex metzger">
+    <meta name=twitter:card content="summary_large_image">
+    <meta name=twitter:image content="//asm.io/img/tc.png">
+    <meta name=twitter:title content="alex metzger">
+    <meta name=twitter:description content="alex metzger">
+    <meta property="og:title" content="alex metzger">
+    <meta property="og:description" content="alex metzger">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="//asm.io/">
+    <meta property="og:image" content="//asm.io/img/tc.png">
+    <meta property="og:updated_time" content="2022-09-27T00:01:00-04:00">
+    <meta property="og:site_name" content="alex metzger">
+
+    <style nonce="MPoBxZwSEjjnUsr">
+     html, body {
+       height: 100%;
+     }
+
+     body {
+       font-family: sans-serif;
+       margin: 0;
+     }
+
+     section {
+       height: 100%;
+       padding: 0;
+       margin: 0;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+     }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div>
+        <h1 id="main">what?</h1>
+      </div>
+    </section>
+
+    <script type="text/javascript" nonce="e4LhAepsKDMbiwG">
+     const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+     const words = ['lol', 'wut?', 'huh?', 'uhh', 'wait, what?'];
+
+
+     const interject = () => {
+       let txt = getRandomElement(words);
+       console.log(txt);
+       document.getElementById('main').innerText = txt;
+     }
+
+     window.addEventListener('load', (_) => {
+       console.log('hi');
+       setInterval(interject, 1000);
+     });
+    </script>
+  </body>
+</html>
