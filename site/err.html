@@ -73,12 +73,10 @@
 
      const interject = () => {
        let txt = getRandomElement(words);
-       console.log(txt);
        document.getElementById('main').innerText = txt;
      }
 
      window.addEventListener('load', (_) => {
-       console.log('hi');
        setInterval(interject, 1000);
      });
     </script>
