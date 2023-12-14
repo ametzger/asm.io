@@ -186,7 +186,7 @@ resource "aws_lambda_function" "url_rewrite" {
   function_name    = "web-url_rewrite"
   role             = aws_iam_role.lambda_role.arn
   handler          = "url-rewrite.handler"
-  runtime          = "nodejs14.x"
+  runtime          = "nodejs20.x"
   publish          = true
   filename         = data.archive_file.url_rewrite_lambda.output_path
   source_code_hash = data.archive_file.url_rewrite_lambda.output_base64sha256
