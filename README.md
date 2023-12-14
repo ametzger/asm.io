@@ -4,8 +4,7 @@ terraform infrastructure and content for [asm.io](https://asm.io).
 
 ## Setup
 
-* Install dependencies: `brew install tfenv just direnv awscli s3cmd python3 jq`
-* Install terraform: `cd infra && tfenv install`
+* Ensure nix is installed: all dependencies are expressed in `flake.nix`
 * Set up env vars: `cp .envrc.example .envrc` and fill in the env vars, then `direnv allow`
 * Set up terraform backend: `cp infra/backend.tf.example infra/backend.tf` and fill in the details
 * Bootstrap the infra:

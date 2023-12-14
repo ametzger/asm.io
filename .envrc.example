@@ -1,2 +1,8 @@
-export TF_VAR_aws_region=<redacted>
-export TF_VAR_site_url=<redacted>
+# -*- shell-script -*-
+
+use flake
+
+export RTX_DISABLE_TOOLS=python,node,terraform
+
+export TF_VAR_aws_region='<redacted>'
+export TF_VAR_site_url='<redacted>'
