@@ -206,6 +206,10 @@ locals {
 
 resource "aws_cloudfront_origin_access_identity" "main" {
   comment = "${var.site_url} origin access identity"
+
+  lifecycle {
+    ignore_changes = [etag]
+  }
 }
 
 resource "aws_cloudfront_distribution" "main" {
