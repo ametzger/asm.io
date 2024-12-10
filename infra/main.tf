@@ -290,7 +290,7 @@ resource "aws_cloudfront_distribution" "main" {
       error_code            = error_code.value
       response_code         = error_code.value
       response_page_path    = "/err.html"
-      error_caching_min_ttl = 30
+      error_caching_min_ttl = 3600
     }
   }
 }
