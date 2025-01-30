@@ -298,6 +298,21 @@ resource "aws_cloudfront_distribution" "main" {
 resource "aws_cloudfront_response_headers_policy" "security_headers" {
   name = "asm-security-headers"
 
+  custom_headers_config {
+    items {
+      header = "Cross-Origin-Resource-Policy"
+      value  = "same-origin"
+
+      override = true
+    }
+  }
+
+  remove_headers_config {
+    items {
+      header = "Server"
+    }
+  }
+
   security_headers_config {
     strict_transport_security {
       access_control_max_age_sec = 31536000
@@ -321,6 +336,7 @@ resource "aws_cloudfront_response_headers_policy" "security_headers" {
 
       override = true
     }
+
     frame_options {
       frame_option = "DENY"
 
