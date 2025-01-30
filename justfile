@@ -11,8 +11,10 @@ distribution_id := `cd infra && terraform show -json | jq -r '.values.root_modul
 invalidate:
 	aws cloudfront create-invalidation --distribution-id={{ distribution_id }} --paths /\* >/dev/null 2>&1
 
+set-cache-headers:
+  s3cmd --recursive modify --add-header="Cache-Control:max-age=86400" s3://${TF_VAR_site_url}
+
 sync:
 	cd site && aws s3 sync . s3://${TF_VAR_site_url}
-	s3cmd --recursive modify --add-header="Cache-Control:max-age=86400" s3://${TF_VAR_site_url}
 
-deploy: sync invalidate
+deploy: sync set-cache-headers invalidate
