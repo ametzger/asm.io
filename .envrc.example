@@ -2,7 +2,9 @@
 
 use flake
 
-export RTX_DISABLE_TOOLS=python,node,terraform
+export MISE_DISABLE_TOOLS=python,node,terraform
 
 export TF_VAR_aws_region='<redacted>'
 export TF_VAR_site_url='<redacted>'
+
+export CF_DISTRIBUTION_ID='<redacted>'
