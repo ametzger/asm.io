@@ -19,9 +19,9 @@
           system = "${system}";
           config.allowUnfree = true;
         };
-        terraform = pkgs.terraform.withPlugins(p: with p; [
-          archive
-          aws
+        terraform = pkgs.terraform.withPlugins (p: with p; [
+          hashicorp_archive
+          hashicorp_aws
         ]);
       in
       {
@@ -33,7 +33,7 @@
             pkgs.httpie
             pkgs.just
             pkgs.jq
-            pkgs.nodejs_20
+            pkgs.nodejs_26
             pkgs.python3
             pkgs.s3cmd
 
