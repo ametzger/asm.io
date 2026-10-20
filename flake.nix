@@ -34,7 +34,6 @@
             pkgs.jq
             pkgs.nodejs_26
             pkgs.python3
-            pkgs.s3cmd
 
             terraform
           ];

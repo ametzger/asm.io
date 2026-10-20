@@ -14,13 +14,10 @@ invalidate:
   echo "invalidating distribution ${distribution_id}"
   aws cloudfront create-invalidation --distribution-id=${distribution_id} --paths /\* >/dev/null 2>&1
 
-set-cache-headers:
-  s3cmd --recursive modify --add-header="Cache-Control:max-age=86400" s3://${TF_VAR_site_url}
-
 sync:
-	cd site && aws s3 sync . s3://${TF_VAR_site_url}
+	cd site && aws s3 sync . s3://${TF_VAR_site_url} --cache-control "public, max-age=300, s-maxage=31536000"
 
-deploy: sync set-cache-headers invalidate
+deploy: sync invalidate
 
 update:
     nix flake update

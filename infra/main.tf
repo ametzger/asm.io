@@ -154,6 +154,10 @@ resource "aws_acm_certificate_validation" "main" {
 ################################################################################
 locals {
   s3_origin_id = "${var.site_url}-S3"
+
+  site_html     = join("", [for f in fileset("${path.module}/../site", "**/*.html") : file("${path.module}/../site/${f}")])
+  script_hashes = [for m in regexall("(?s)<script[^>]*>(.*?)</script>", local.site_html) : "'sha256-${base64sha256(m[0])}'"]
+  style_hashes  = [for m in regexall("(?s)<style[^>]*>(.*?)</style>", local.site_html) : "'sha256-${base64sha256(m[0])}'"]
 }
 
 resource "aws_cloudfront_function" "url_rewrite" {
@@ -283,7 +287,7 @@ resource "aws_cloudfront_response_headers_policy" "security_headers" {
     }
 
     content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'unsafe-inline' 'nonce-e4LhAepsKDMbiwG'; style-src 'nonce-MPoBxZwSEjjnUsr'; manifest-src 'self'; base-uri 'self'; object-src 'none';"
+      content_security_policy = "default-src 'self'; script-src ${join(" ", local.script_hashes)}; style-src ${join(" ", local.style_hashes)}; manifest-src 'self'; base-uri 'self'; object-src 'none';"
 
       override = true
     }
