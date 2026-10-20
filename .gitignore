@@ -4,9 +4,6 @@
 # Local .terraform directories
 **/.terraform/*
 
-# built terraform lambdas
-infra/*.zip
-
 # .tfstate files
 *.tfstate
 *.tfstate.*

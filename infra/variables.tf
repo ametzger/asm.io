@@ -1,12 +1,9 @@
 variable "aws_region" {
+  type        = string
   description = "AWS region"
 }
 
 variable "site_url" {
+  type        = string
   description = "URL of the site to provision"
-}
-
-variable "additional_urls" {
-  default     = []
-  description = "Alternate URLs that should point to site"
 }

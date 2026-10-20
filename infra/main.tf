@@ -24,25 +24,9 @@ resource "aws_s3_bucket" "logs" {
 resource "aws_s3_bucket_acl" "logs" {
   bucket = aws_s3_bucket.logs.id
 
+  depends_on = [aws_s3_bucket_ownership_controls.logs]
+
   access_control_policy {
-    grant {
-      grantee {
-        type = "Group"
-        uri  = "http://acs.amazonaws.com/groups/s3/LogDelivery"
-      }
-
-      permission = "READ_ACP"
-    }
-
-    grant {
-      grantee {
-        type = "Group"
-        uri  = "http://acs.amazonaws.com/groups/s3/LogDelivery"
-      }
-
-      permission = "WRITE"
-    }
-
     # cloudfront log delivery
     grant {
       grantee {
@@ -83,13 +67,39 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
   }
 }
 
+data "aws_iam_policy_document" "access_log_delivery" {
+  statement {
+    actions   = ["s3:PutObject"]
+    resources = ["${aws_s3_bucket.logs.arn}/logs/*"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [aws_s3_bucket.main.arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  policy = data.aws_iam_policy_document.access_log_delivery.json
+}
+
 resource "aws_s3_bucket" "main" {
   bucket = var.site_url
 }
 
-resource "aws_s3_bucket_acl" "main" {
+resource "aws_s3_bucket_ownership_controls" "main" {
   bucket = aws_s3_bucket.main.id
-  acl    = "private"
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
 
 resource "aws_s3_bucket_logging" "main" {
@@ -140,85 +150,35 @@ resource "aws_acm_certificate_validation" "main" {
 }
 
 ################################################################################
-# Lambda #######################################################################
-################################################################################
-provider "archive" {}
-
-resource "aws_iam_role" "lambda_role" {
-  name = "web-lambda-role"
-
-  assume_role_policy = <<-EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "lambda.amazonaws.com"
-        },
-        "Effect": "Allow"
-      },
-      {
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "edgelambda.amazonaws.com"
-        },
-        "Effect": "Allow"
-      }
-    ]
-  }
-EOF
-
-}
-
-data "archive_file" "url_rewrite_lambda" {
-  type = "zip"
-
-  source {
-    content  = file("${path.module}/url-rewrite.js")
-    filename = "url-rewrite.js"
-  }
-
-  output_path = "url-rewrite.zip"
-}
-
-resource "aws_lambda_function" "url_rewrite" {
-  function_name    = "web-url_rewrite"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "url-rewrite.handler"
-  runtime          = "nodejs20.x"
-  publish          = true
-  filename         = data.archive_file.url_rewrite_lambda.output_path
-  source_code_hash = data.archive_file.url_rewrite_lambda.output_base64sha256
-}
-
-resource "aws_cloudwatch_log_group" "url_rewrite" {
-  name = "/aws/lambda/${aws_lambda_function.url_rewrite.function_name}"
-}
-
-################################################################################
 # CloudFront ###################################################################
 ################################################################################
 locals {
-  s3_origin_id    = "${var.site_url}-S3"
-  s3_regional_url = "${aws_s3_bucket.main.bucket}.s3.${var.aws_region}.amazonaws.com"
+  s3_origin_id = "${var.site_url}-S3"
 }
 
-resource "aws_cloudfront_origin_access_identity" "main" {
-  comment = "${var.site_url} origin access identity"
+resource "aws_cloudfront_function" "url_rewrite" {
+  name    = "web-url_rewrite"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code    = file("${path.module}/url-rewrite.js")
+}
+
+resource "aws_cloudfront_origin_access_control" "main" {
+  name                              = var.site_url
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+data "aws_cloudfront_cache_policy" "caching_optimized" {
+  name = "Managed-CachingOptimized"
 }
 
 resource "aws_cloudfront_distribution" "main" {
   origin {
-    # HACK(asm,2022-03-10): This version of the AWS provider seems to
-    # give a non-regional URL for this, so hack around that.
-    # domain_name = aws_s3_bucket.main.bucket_regional_domain_name
-    domain_name = local.s3_regional_url
-    origin_id   = local.s3_origin_id
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.main.cloudfront_access_identity_path
-    }
+    domain_name              = aws_s3_bucket.main.bucket_regional_domain_name
+    origin_id                = local.s3_origin_id
+    origin_access_control_id = aws_cloudfront_origin_access_control.main.id
   }
 
   enabled             = true
@@ -229,35 +189,24 @@ resource "aws_cloudfront_distribution" "main" {
   aliases = [var.site_url, "www.${var.site_url}"]
 
   default_cache_behavior {
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.s3_origin_id
     compress         = true
+    cache_policy_id  = data.aws_cloudfront_cache_policy.caching_optimized.id
 
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    lambda_function_association {
-      event_type   = "origin-request"
-      lambda_arn   = aws_lambda_function.url_rewrite.qualified_arn
-      include_body = false
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.url_rewrite.arn
     }
 
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers.id
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.main.arn
+    acm_certificate_arn      = aws_acm_certificate_validation.main.certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
@@ -278,7 +227,7 @@ resource "aws_cloudfront_distribution" "main" {
   dynamic "custom_error_response" {
     for_each = concat(
       [400, 403, 404, 405, 414, 416],
-      range(500, 504)
+      range(500, 505)
     )
     iterator = error_code
 
@@ -317,12 +266,6 @@ resource "aws_cloudfront_response_headers_policy" "security_headers" {
       override                   = true
     }
 
-    xss_protection {
-      mode_block = true
-      override   = true
-      protection = true
-    }
-
     content_type_options {
       override = true
     }
@@ -353,8 +296,14 @@ data "aws_iam_policy_document" "cloudfront_access" {
     resources = ["${aws_s3_bucket.main.arn}/*"]
 
     principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.main.iam_arn]
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = [aws_cloudfront_distribution.main.arn]
     }
   }
 }

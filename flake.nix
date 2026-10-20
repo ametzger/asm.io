@@ -20,7 +20,6 @@
           config.allowUnfree = true;
         };
         terraform = pkgs.terraform.withPlugins (p: with p; [
-          hashicorp_archive
           hashicorp_aws
         ]);
       in
